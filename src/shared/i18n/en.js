@@ -15,7 +15,7 @@ const en = {
   },
   hero: {
     vision: "We nurture whole-minded learners through English-medium STEAM education, applied technology and AI for outstanding international results",
-    subtitle: "Turon International School — Chorvoq",
+    subtitle: "Turon International School — Chirchiq",
     cta: "Explore Our School",
     apply: "Apply Now",
   },
@@ -25,7 +25,7 @@ const en = {
   },
   ourSchool: {
     title: "Our School",
-    chirchiq: "TIS Chorvoq",
+    chirchiq: "TIS Chirchiq",
     chirchiqDesc: "Four distinct learning environments, united by a shared commitment to educational excellence.",
     locationDesc: "We develop each student's potential through a strong commitment to educational excellence.",
   },
@@ -96,7 +96,7 @@ const en = {
       {
         date: "April 5, 2026",
         title: "Turon Inter-School Spartakiad",
-        desc: "Our students represented TIS Chorvoq with excellence at the annual Turon inter-school sports games.",
+        desc: "Our students represented TIS Chirchiq with excellence at the annual Turon inter-school sports games.",
       },
     ],
   },
@@ -265,8 +265,8 @@ const en = {
     title: "Admissions",
     subtitle: "Our admissions process is clear, consistent, and fully guided, ensuring a simple and supportive experience for every family.",
     schoolCard: {
-      name: "TIS Chorvoq",
-      location: "Chorvoq, Tashkent Region",
+      name: "TIS Chirchiq",
+      location: "Chirchiq, Tashkent Region",
       ageRange: "Ages 6–18",
       curriculum: "Cambridge International + National Hybrid",
     },
@@ -274,7 +274,7 @@ const en = {
     howToApply: "How to Apply",
     steps: ["Fill out the application form", "Our team will call you within 24 hours", "Schedule a campus visit", "Complete enrollment process"],
     modal: {
-      title: "Apply to TIS Chorvoq",
+      title: "Apply to TIS Chirchiq",
       namePlaceholder: "Full Name",
       phonePlaceholder: "Phone Number",
       gradePlaceholder: "Grade Applying For",
@@ -284,7 +284,7 @@ const en = {
   },
   contact: {
     title: "Contact Us",
-    address: "Chorvoq, Tashkent Region, Uzbekistan",
+    address: "Chirchiq, Tashkent Region, Uzbekistan",
     email: "info@turonschool.uz",
     phone: "+998 90 123 45 67",
     mapTitle: "Find Us",

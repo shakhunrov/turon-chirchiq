@@ -29,7 +29,7 @@ export default function Footer() {
               <img width={70} src={logo} alt=""/>
             <div>
               <div className="footer-logo-name">TURON</div>
-              <div className="footer-logo-sub">International School · Chorvoq</div>
+              <div className="footer-logo-sub">International School · Chirchiq</div>
             </div>
           </div>
           <p className="footer-tagline">{t.footer.tagline}</p>
