@@ -24,4 +24,5 @@ export {
   selectApplicationsLoading,
   selectApplicationsError,
   selectApplySuccess,
+    uploadApplicationCV
 } from './applicationsSlice';

@@ -97,7 +97,25 @@ export const updateApplicationStatus = createAsyncThunk(
     }
   },
 );
+// PATCH /website-sources/applications/<id>/upload-cv/
+export const uploadApplicationCV = createAsyncThunk(
+    'careers/uploadApplicationCV',
+    async ({ id, cvFile }, { rejectWithValue }) => {
+        try {
+            const formData = new FormData();
+            formData.append('cv_file', cvFile);
 
+            const { data } = await api.patch(
+                `/website-sources/applications/${id}/upload-cv/`,
+                formData,
+                { headers: { 'Content-Type': 'multipart/form-data' } }
+            );
+            return data;
+        } catch (err) {
+            return rejectWithValue(err.response?.data || 'Failed to upload CV');
+        }
+    }
+);
 // ── Slice ─────────────────────────────────────────────────────────
 
 const initialState = {
@@ -122,6 +140,10 @@ const applicationsSlice = createSlice({
   extraReducers: (builder) => {
     // ── apply ──
     builder
+        .addCase(uploadApplicationCV.fulfilled, (state, { payload }) => {
+            const idx = state.applications.findIndex((a) => a.id === payload.id);
+            if (idx !== -1) state.applications[idx] = payload;
+        })
       .addCase(applyForPosition.pending, (state) => {
         state.loading = true;
         state.error = null;

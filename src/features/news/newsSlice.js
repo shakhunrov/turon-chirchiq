@@ -111,7 +111,25 @@ export const deleteNews = createAsyncThunk(
     }
   },
 );
+// PATCH /website-sources/news/<id>/upload-image/
+export const uploadNewsImage = createAsyncThunk(
+    'news/uploadImage',
+    async ({ id, imageFile }, { rejectWithValue }) => {
+        try {
+            const formData = new FormData();
+            formData.append('image', imageFile);
 
+            const { data } = await api.patch(
+                `/website-sources/news/${id}/upload-image/`,
+                formData,
+                { headers: { 'Content-Type': 'multipart/form-data' } }
+            );
+            return data;
+        } catch (err) {
+            return rejectWithValue(err.response?.data || 'Failed to upload image');
+        }
+    }
+);
 // ── Slice ─────────────────────────────────────────────────────────
 
 const initialState = {
@@ -134,6 +152,7 @@ const newsSlice = createSlice({
   },
   extraReducers: (builder) => {
     // ── fetch all ──
+
     builder
       .addCase(fetchNews.pending, (state) => {
         state.loading = true;
@@ -146,7 +165,11 @@ const newsSlice = createSlice({
       .addCase(fetchNews.rejected, (state, { payload }) => {
         state.loading = false;
         state.error = payload;
-      });
+      })
+  .addCase(uploadNewsImage.fulfilled, (state, { payload }) => {
+          const idx = state.newsList.findIndex((n) => n.id === payload.id);
+          if (idx !== -1) state.newsList[idx] = payload;
+      })
 
     // ── fetch by id ──
     builder

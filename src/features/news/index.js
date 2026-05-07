@@ -11,4 +11,5 @@ export {
   selectCurrentNews,
   selectNewsLoading,
   selectNewsError,
+    uploadNewsImage
 } from './newsSlice';
