@@ -1,0 +1,40 @@
+import { lazy } from 'react';
+import type { ComponentRegistry } from '../cms/types';
+
+export const registry: ComponentRegistry = {
+  hero: lazy(() => import('./components/HeroSection')),
+  HeroBanner: lazy(() => import('../../widgets/hero-banner/HeroBanner')),
+  WhoWeAre: lazy(() => import('../../widgets/home/HomeAbout')),
+  Stats: lazy(() => import('../../widgets/home/HomeStats')),
+  Philosophy: lazy(() => import('../../widgets/home/HomePhilosophy')),
+  WhyChoose: lazy(() => import('../../widgets/why-choose/WhyChoose')),
+  Testimonials: lazy(() => import('../../widgets/testimonials/Testimonials')),
+  NewsSection: lazy(() => import('../../widgets/news-section/NewsSection')),
+  CTA: lazy(() => import('../../widgets/home/HomeCTA')),
+  AboutVision: lazy(() => import('../../pages/about-vision/AboutVision')),
+  AboutCampus: lazy(() => import('../../pages/about-campus/AboutCampus')),
+  AboutLeadership: lazy(() => import('../../pages/about-leadership/AboutLeadership')),
+  AboutWhyTis: lazy(() => import('../../pages/about-why-tis/AboutWhyTis')),
+  EducationContent: lazy(() => import('../../pages/education/Education')),
+  PartnershipsContent: lazy(() => import('../../pages/partnerships/Partnerships')),
+  CareersContent: lazy(() => import('../../pages/careers/Careers')),
+  AdmissionsContent: lazy(() => import('../../pages/admissions/Admissions')),
+  ContactContent: lazy(() => import('../../pages/contact/Contact')),
+  
+  // Education & Vision specific blocks
+  TruthBlock: lazy(() => import('../../widgets/education/TruthBlock')),
+  ApproachBlock: lazy(() => import('../../widgets/education/ApproachBlock')),
+  SkillsGrid: lazy(() => import('../../widgets/education/SkillsGrid')),
+  ClassroomTable: lazy(() => import('../../widgets/education/ClassroomTable')),
+  VisionBlock: lazy(() => import('../../widgets/about/VisionBlock')),
+  ValuesGrid: lazy(() => import('../../widgets/about/ValuesGrid')),
+  OutcomesList: lazy(() => import('../../widgets/about/OutcomesList')),
+  card: lazy(() => import('./components/CardSection')),
+  cards: lazy(() => import('./components/CardsSection')),
+  stats: lazy(() => import('./components/StatsSection')),
+  cta: lazy(() => import('./components/CtaSection')),
+  table: lazy(() => import('./components/TableSection')),
+  chart: lazy(() => import('./components/ChartSection')),
+  form: lazy(() => import('./components/FormSection')),
+  richText: lazy(() => import('./components/RichTextSection')),
+};

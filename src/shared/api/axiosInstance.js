@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const BASE_URL = 'https://school.gennis.uz/api';
+const BASE_URL = 'http://localhost:8002/api';
 
 const api = axios.create({
   baseURL: BASE_URL,

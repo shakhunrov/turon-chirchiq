@@ -5,7 +5,7 @@ import './Testimonials.css';
 
 export default function Testimonials() {
   const { t } = useLang();
-  const items = t.testimonials.items;
+  const items = t.testimonials_items || t.testimonials.items;
   const [idx, setIdx] = useState(0);
   const prev = () => setIdx((i) => (i - 1 + items.length) % items.length);
   const next = () => setIdx((i) => (i + 1) % items.length);

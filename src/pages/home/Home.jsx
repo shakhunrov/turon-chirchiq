@@ -18,11 +18,11 @@ export default function Home() {
       <section className="section">
         <div className="container who-we-are">
           <div className="wwa-content">
-            <span className="section-label">{t.nav.about}</span>
-            <h2 className="section-title">{t.whoWeAre.title}</h2>
+            <span className="section-label">{t.nav?.about}</span>
+            <h2 className="section-title">{t.whoWeAre?.title}</h2>
             <div className="divider" />
-            <p className="wwa-text">{t.whoWeAre.text}</p>
-            <Link to="/about/vision" className="btn btn-primary" style={{ marginTop: 16 }}>Batafsil →</Link>
+            <p className="wwa-text">{t.whoWeAre?.text}</p>
+            <Link to="/about/vision" className="btn btn-primary" style={{ marginTop: 16 }}>{t.nav?.about ? 'Batafsil →' : 'More →'}</Link>
           </div>
           <div className="wwa-image-side">
             <img src={schoolImg} alt="Turon International School" className="wwa-school-img" />
@@ -39,19 +39,29 @@ export default function Home() {
             <div className="divider center" />
           </div>
           <div className="stats-grid">
-            {[
-              { val: t.stats.studentsVal, label: t.stats.students, icon: '👨‍🎓', note: null },
-              { val: t.stats.teachersVal, label: t.stats.teachers, icon: '👩‍🏫', note: t.stats.teachersNote },
-              { val: t.stats.programsVal, label: t.stats.programs, icon: '📚', note: null },
-              { val: t.stats.universitiesVal, label: t.stats.universities, icon: '🏛️', note: null },
-            ].map((s) => (
-              <div key={s.label} className="stat-card glass-card">
-                <div className="stat-icon">{s.icon}</div>
-                <div className="stat-val">{s.val}</div>
-                <div className="stat-label">{s.label}</div>
-                {s.note && <div className="stat-note">{s.note}</div>}
-              </div>
-            ))}
+            {t.stats_items ? (
+              t.stats_items.map((s) => (
+                <div key={s.id} className="stat-card glass-card">
+                  <div className="stat-icon">{s.icon || '📊'}</div>
+                  <div className="stat-val">{s.value}</div>
+                  <div className="stat-label">{s.label}</div>
+                </div>
+              ))
+            ) : (
+              [
+                { val: t.stats.studentsVal, label: t.stats.students, icon: '👨‍🎓', note: null },
+                { val: t.stats.teachersVal, label: t.stats.teachers, icon: '👩‍🏫', note: t.stats.teachersNote },
+                { val: t.stats.programsVal, label: t.stats.programs, icon: '📚', note: null },
+                { val: t.stats.universitiesVal, label: t.stats.universities, icon: '🏛️', note: null },
+              ].map((s) => (
+                <div key={s.label} className="stat-card glass-card">
+                  <div className="stat-icon">{s.icon}</div>
+                  <div className="stat-val">{s.val}</div>
+                  <div className="stat-label">{s.label}</div>
+                  {s.note && <div className="stat-note">{s.note}</div>}
+                </div>
+              ))
+            )}
           </div>
         </div>
       </section>

@@ -1,54 +1,41 @@
 import { useEffect, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
 import { useLang } from '../../shared/i18n';
-import {
-  fetchPositions,
-  selectPositions,
-  selectPositionsLoading,
-  applyForPosition,
-  resetApplyStatus,
-  selectApplySuccess,
-  selectApplicationsLoading,
-} from '../../features/careers';
+import { useJobPositions, useJobApplicationMutation } from '../../shared/api/hooks';
 import { Briefcase, Calendar, CheckCircle, Send, X } from 'lucide-react';
 import './Careers.css';
 
 export default function Careers() {
   const { t } = useLang();
   const c = t.careers;
-  const dispatch = useDispatch();
+  const branchId = localStorage.getItem("globalBranchId");
 
-  const positions = useSelector(selectPositions);
-  const positionsLoading = useSelector(selectPositionsLoading);
-  const applySuccess = useSelector(selectApplySuccess);
-  const applyLoading = useSelector(selectApplicationsLoading);
-  const branchId = localStorage.getItem("globalBranchId")
+  const { data: positions = [], isLoading: positionsLoading } = useJobPositions({ branch: branchId });
+  const applicationMutation = useJobApplicationMutation();
+  const { mutate: apply, isLoading: applyLoading, isSuccess: applySuccess, reset: resetApply } = applicationMutation;
+
   const [applyModal, setApplyModal] = useState(null); // position object or null
   const [applyForm, setApplyForm] = useState({ name: '', email: '', phone: '' });
-
-  useEffect(() => {
-    dispatch(fetchPositions({ branch: branchId }));
-  }, [dispatch]);
 
   useEffect(() => {
     if (applySuccess) {
       // Auto-close after 2s
       const timer = setTimeout(() => {
         setApplyModal(null);
-        dispatch(resetApplyStatus());
+        resetApply();
         setApplyForm({ name: '', email: '', phone: '' });
       }, 2000);
       return () => clearTimeout(timer);
     }
-  }, [applySuccess, dispatch]);
+  }, [applySuccess, resetApply]);
 
   const handleApply = (e) => {
     e.preventDefault();
     if (!applyModal) return;
-    dispatch(applyForPosition({
+    apply({
       ...applyForm,
       position: applyModal.id,
-    }));
+      branch: branchId
+    });
   };
 
   const activePositions = positions.filter((p) => p.is_active);
@@ -86,7 +73,7 @@ export default function Careers() {
           <div className="pathway-section glass-card">
             <h2 className="pathway-title">{c.pathwayTitle}</h2>
             <div className="pathway-steps">
-              {c.pathway.split(' → ').map((step, i, arr) => (
+              {(c.pathway || "").split(' → ').map((step, i, arr) => (
                 <div key={i} className="pathway-step-wrapper">
                   <div className="pathway-step">{step}</div>
                   {i < arr.length - 1 && <span className="pathway-arrow">→</span>}
@@ -139,7 +126,7 @@ export default function Careers() {
                       </div>
                     )}
                     <button className="btn btn-primary position-apply-btn"
-                      onClick={() => { setApplyModal(pos); dispatch(resetApplyStatus()); setApplyForm({ name: '', email: '', phone: '' }); }}>
+                      onClick={() => { setApplyModal(pos); resetApply(); setApplyForm({ name: '', email: '', phone: '' }); }}>
                       <Send size={14} /> Apply Now
                     </button>
                   </div>
@@ -172,9 +159,9 @@ export default function Careers() {
 
       {/* ═══ Apply Modal ═══ */}
       {applyModal && (
-        <div className="modal-overlay" onClick={() => { setApplyModal(null); dispatch(resetApplyStatus()); }}>
+        <div className="modal-overlay" onClick={() => { setApplyModal(null); resetApply(); }}>
           <div className="modal-box" onClick={(e) => e.stopPropagation()}>
-            <button className="modal-close" onClick={() => { setApplyModal(null); dispatch(resetApplyStatus()); }}>
+            <button className="modal-close" onClick={() => { setApplyModal(null); resetApply(); }}>
               <X size={20} />
             </button>
             <div className="modal-header">

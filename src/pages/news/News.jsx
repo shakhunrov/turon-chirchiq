@@ -1,11 +1,6 @@
 import { useEffect, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
 import { useLang } from '../../shared/i18n';
-import {
-  fetchNews,
-  selectNewsList,
-  selectNewsLoading,
-} from '../../features/news';
+import { useNews } from '../../shared/api/hooks';
 import { X } from 'lucide-react';
 import './News.css';
 
@@ -17,19 +12,12 @@ export default function News() {
   const title = typeof t.news === 'string' ? t.news : (t.news?.title || 'News & Media');
   const readMoreText = typeof t.news === 'object' ? (t.news?.readMore || 'Read More') : 'Read More';
   const allText = typeof t.news === 'object' ? (t.news?.categories?.[0] || 'All') : 'All';
-  const branchId = localStorage.getItem("globalBranchId")
-  const dispatch = useDispatch();
+  const branchId = localStorage.getItem("globalBranchId");
 
-  const newsList = useSelector(selectNewsList);
-  const loading = useSelector(selectNewsLoading);
-
-  const [cat, setCat] = useState('All');
-  const [selectedNews, setSelectedNews] = useState(null);
-
-  // Fetch published news on mount
-  useEffect(() => {
-    dispatch(fetchNews({ branch: branchId, published: true }));
-  }, [dispatch]);
+  const { data: newsList = [], isLoading: loading } = useNews({ 
+    branch: branchId, 
+    published: true 
+  });
 
   const allPosts = newsList.filter((p) => p.published !== false);
 

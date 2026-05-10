@@ -1,114 +1,153 @@
 import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Menu, X } from 'lucide-react';
+import { Menu, X, ChevronDown } from 'lucide-react';
 import { useLang } from '../../shared/i18n';
 import LanguageSwitcher from '../../features/language-switcher/LanguageSwitcher';
-import './Navbar.css';
-import logo from "../../shared/assets/logo/turonLogo.png"
-
-const navLinks = (t) => [
-  { label: t.nav.home, href: '/' },
-  {
-    label: t.nav.about, href: '/about',
-    children: [
-      { label: t.nav.campus, href: '/about/campus' },
-      { label: t.nav.vision, href: '/about/vision' },
-      { label: t.nav.leadership, href: '/about/leadership' },
-      { label: t.nav.whyTis, href: '/about/why-tis' },
-    ],
-  },
-  { label: t.nav.education, href: '/education' },
-  { label: t.nav.partnerships, href: '/partnerships' },
-  { label: t.nav.careers, href: '/careers' },
-  { label: t.nav.news, href: '/news' },
-  { label: t.nav.admissions, href: '/admissions' },
-  { label: t.nav.contact, href: '/contact' },
-];
+import logo from "../../shared/assets/logo/turonLogo.png";
+import { useQuery } from '@tanstack/react-query';
+import api from '../../shared/api/axiosInstance';
+import { cn } from '../../shared/utils/cn';
 
 export default function Navbar() {
   const { t } = useLang();
   const location = useLocation();
+  const branchId = localStorage.getItem('globalBranchId');
+  const locale = localStorage.getItem('locale') || 'uz';
+
+  const { data: menuItems } = useQuery({
+    queryKey: ['menu', 'main_nav', branchId, locale],
+    queryFn: async () => {
+      const res = await api.get(`/website-sources/cms/navigation/main_nav/`, {
+        params: { branch: branchId }
+      });
+      return res.data.items;
+    },
+    staleTime: 60000
+  });
+
   const [scrolled, setScrolled] = useState(false);
-  const [open, setOpen] = useState(false);
-  const [dropdown, setDropdown] = useState(null);
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const [activeDropdown, setActiveDropdown] = useState(null);
 
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 40);
+    const onScroll = () => setScrolled(window.scrollY > 20);
     window.addEventListener('scroll', onScroll);
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
-  useEffect(() => { setOpen(false); setDropdown(null); }, [location.pathname]);
+  useEffect(() => {
+    setMobileOpen(false);
+    setActiveDropdown(null);
+  }, [location.pathname]);
 
-  const links = navLinks(t);
+  const links = menuItems || [];
 
   return (
-    <header className={`navbar ${scrolled ? 'scrolled' : ''}`}>
-      <div className="container navbar-inner">
-        {/* Logo */}
-        <Link to="/" className="navbar-logo">
-          <div className="logo-icon">
-              <img  width={70} src={logo} alt=""/>
+    <header className={cn(
+      "fixed top-0 left-0 right-0 z-[1000] transition-all duration-500",
+      scrolled 
+        ? "bg-white/95 backdrop-blur-xl shadow-lg py-3 border-b border-navy/5" 
+        : "bg-transparent py-6"
+    )}>
+      <div className="container-custom flex items-center justify-between">
+        {/* Logo Identity */}
+        <Link to="/" className="flex items-center gap-4 group">
+          <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center p-1 shadow-sm group-hover:rotate-6 transition-transform duration-500">
+            <img src={logo} alt="Turon Logo" className="w-full h-full object-contain" />
           </div>
-          <div className="logo-text">
-            <span className="logo-name">TURON</span>
-            <span className="logo-sub">International School</span>
+          <div className="hidden sm:flex flex-col leading-none">
+            <span className="text-lg font-head font-black tracking-widest text-navy">TURON</span>
+            <span className="text-[9px] font-black tracking-[0.2em] text-gold uppercase mt-1">International School</span>
           </div>
         </Link>
 
-        {/* Desktop Nav */}
-        <nav className="navbar-links">
-          {links.map((link) => (
-            <div
-              key={link.href}
-              className="nav-item"
-              onMouseEnter={() => link.children && setDropdown(link.href)}
-              onMouseLeave={() => setDropdown(null)}
+        {/* Desktop Navigation */}
+        <nav className="hidden lg:flex items-center gap-2">
+          {links.map((link, i) => (
+            <div 
+              key={`${link.path}-${i}`} 
+              className="relative group"
+              onMouseEnter={() => link.children && setActiveDropdown(link.path)}
+              onMouseLeave={() => setActiveDropdown(null)}
             >
               <Link
-                to={link.href}
-                className={`nav-link ${location.pathname === link.href || location.pathname.startsWith(link.href + '/') ? 'active' : ''}`}
+                to={link.path || '#'}
+                className={cn(
+                  "px-4 py-2 text-[13px] font-head font-bold uppercase tracking-widest transition-all flex items-center gap-2",
+                  location.pathname === link.path ? "text-gold" : "text-navy/70 hover:text-navy"
+                )}
               >
                 {link.label}
-                {link.children && <svg width="12" height="12" viewBox="0 0 12 12" fill="currentColor" style={{marginLeft:4}}><path d="M2 4l4 4 4-4"/></svg>}
+                {link.children && <ChevronDown size={14} className={cn("transition-transform duration-300", activeDropdown === link.path && "rotate-180")} />}
               </Link>
-              {link.children && dropdown === link.href && (
-                <div className="nav-dropdown">
-                  {link.children.map((child) => (
-                    <Link key={child.href} to={child.href} className="nav-dropdown-item">
-                      {child.label}
-                    </Link>
-                  ))}
+              
+              {link.children && activeDropdown === link.path && (
+                <div className="absolute top-full left-1/2 -translate-x-1/2 pt-4 animate-in fade-in slide-in-from-top-2 duration-300">
+                  <div className="w-64 bg-white rounded-2xl shadow-2xl border border-navy/5 p-3 grid gap-1">
+                    {link.children.map((child, j) => (
+                      <Link 
+                        key={`${child.path}-${j}`} 
+                        to={child.path}
+                        className="px-5 py-3 rounded-xl text-xs font-bold text-navy/60 hover:bg-navy/5 hover:text-navy transition-all flex items-center justify-between group/item"
+                      >
+                        {child.label}
+                        <div className="w-1.5 h-1.5 rounded-full bg-gold opacity-0 group-hover/item:opacity-100 transition-opacity" />
+                      </Link>
+                    ))}
+                  </div>
                 </div>
               )}
             </div>
           ))}
         </nav>
 
-        {/* Right side */}
-        <div className="navbar-right">
-          <LanguageSwitcher />
-          <Link to="/admissions" className="btn btn-primary btn-sm">
-            {t.hero.apply}
+        {/* Action Center */}
+        <div className="flex items-center gap-4">
+          <div className="hidden md:block">
+            <LanguageSwitcher />
+          </div>
+          <Link 
+            to="/admissions" 
+            className="hidden sm:flex grad-luxury text-white px-8 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest shadow-xl hover:translate-y-[-2px] transition-all"
+          >
+            {t.hero?.apply || 'Apply Now'}
           </Link>
-          <button className="menu-btn" onClick={() => setOpen(!open)} aria-label="Menu">
-            {open ? <X size={22} /> : <Menu size={22} />}
+          <button 
+            className="lg:hidden w-12 h-12 flex items-center justify-center text-navy hover:bg-navy/5 rounded-xl transition-all"
+            onClick={() => setMobileOpen(!mobileOpen)}
+          >
+            {mobileOpen ? <X size={24} /> : <Menu size={24} />}
           </button>
         </div>
       </div>
 
-      {/* Mobile Menu */}
-      {open && (
-        <div className="mobile-menu">
-          {links.map((link) => (
-            <div key={link.href}>
-              <Link to={link.href} className="mobile-link">{link.label}</Link>
-              {link.children && link.children.map((child) => (
-                <Link key={child.href} to={child.href} className="mobile-link mobile-link-sub">{child.label}</Link>
-              ))}
-            </div>
-          ))}
-          <LanguageSwitcher />
+      {/* Mobile Portal */}
+      {mobileOpen && (
+        <div className="lg:hidden absolute top-full left-0 right-0 bg-white border-t border-navy/5 p-6 space-y-4 shadow-2xl animate-in slide-in-from-top-4 duration-500">
+          <div className="grid gap-2">
+            {links.map((link, i) => (
+              <div key={i} className="space-y-2">
+                <Link to={link.path || '#'} className="block px-4 py-3 rounded-xl text-sm font-bold text-navy hover:bg-navy/5">
+                  {link.label}
+                </Link>
+                {link.children && (
+                  <div className="ml-4 pl-4 border-l border-navy/5 grid gap-1">
+                    {link.children.map((child, j) => (
+                      <Link key={j} to={child.path} className="block px-4 py-2 rounded-lg text-xs font-medium text-navy/60">
+                        {child.label}
+                      </Link>
+                    ))}
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+          <div className="pt-4 border-t border-navy/5 flex items-center justify-between">
+            <LanguageSwitcher />
+            <Link to="/admissions" className="grad-gold text-white px-6 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest">
+              Join Us
+            </Link>
+          </div>
         </div>
       )}
     </header>

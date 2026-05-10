@@ -1,3 +1,5 @@
+import { useQuery } from '@tanstack/react-query';
+import api from '../../shared/api/axiosInstance';
 import { Link } from 'react-router-dom';
 import { useLang } from '../../shared/i18n';
 import LanguageSwitcher from '../../features/language-switcher/LanguageSwitcher';
@@ -7,16 +9,29 @@ import logo from "../../shared/assets/logo/turonLogo.png"
 
 export default function Footer() {
   const { t } = useLang();
+  const branchId = localStorage.getItem('globalBranchId') || '6';
 
-  const quickLinks = [
-    { label: t.nav.home, href: '/' },
-    { label: t.nav.about, href: '/about/vision' },
-    { label: t.nav.education, href: '/education' },
-    { label: t.nav.partnerships, href: '/partnerships' },
-    { label: t.nav.careers, href: '/careers' },
-    { label: t.nav.news, href: '/news' },
-    { label: t.nav.admissions, href: '/admissions' },
-    { label: t.nav.contact, href: '/contact' },
+  const { data: footerConfig } = useQuery({
+    queryKey: ['reusable-block', 'default_footer', branchId],
+    queryFn: async () => {
+      const res = await api.get(`/website-sources/cms/blocks/default_footer/`, {
+        params: { branch: branchId }
+      });
+      return res.data.sections?.[0]?.props || {};
+    }
+  });
+
+  const tagline = footerConfig?.tagline || t.footer?.tagline;
+  
+  const quickLinks = footerConfig?.links || [
+    { label: t.nav?.home, href: '/' },
+    { label: t.nav?.about, href: '/about/vision' },
+    { label: t.nav?.education, href: '/education' },
+    { label: t.nav?.partnerships, href: '/partnerships' },
+    { label: t.nav?.careers, href: '/careers' },
+    { label: t.nav?.news, href: '/news' },
+    { label: t.nav?.admissions, href: '/admissions' },
+    { label: t.nav?.contact, href: '/contact' },
   ];
 
   return (
@@ -32,16 +47,16 @@ export default function Footer() {
               <div className="footer-logo-sub">International School · Chirchiq</div>
             </div>
           </div>
-          <p className="footer-tagline">{t.footer.tagline}</p>
+          <p className="footer-tagline">{tagline}</p>
           <div className="footer-contact-items">
             <a href="https://maps.google.com" className="footer-contact-item" target="_blank" rel="noreferrer">
-              <MapPin size={14} /> {t.contact.address}
+              <MapPin size={14} /> {t.contact?.address}
             </a>
-            <a href={`mailto:${t.contact.email}`} className="footer-contact-item">
-              <Mail size={14} /> {t.contact.email}
+            <a href={`mailto:${t.contact?.email}`} className="footer-contact-item">
+              <Mail size={14} /> {t.contact?.email}
             </a>
-            <a href={`tel:${t.contact.phone}`} className="footer-contact-item">
-              <Phone size={14} /> {t.contact.phone}
+            <a href={`tel:${t.contact?.phone}`} className="footer-contact-item">
+              <Phone size={14} /> {t.contact?.phone}
             </a>
           </div>
           <div className="footer-social">
@@ -53,10 +68,10 @@ export default function Footer() {
 
         {/* Quick Links */}
         <div className="footer-col">
-          <h4 className="footer-col-title">{t.footer.links}</h4>
+          <h4 className="footer-col-title">{t.footer?.links}</h4>
           <ul className="footer-links-list">
-            {quickLinks.map((l) => (
-              <li key={l.href}>
+            {quickLinks.map((l, i) => (
+              <li key={i}>
                 <Link to={l.href} className="footer-link">{l.label}</Link>
               </li>
             ))}
@@ -65,7 +80,7 @@ export default function Footer() {
 
         {/* Accreditations & Lang */}
         <div className="footer-col">
-          <h4 className="footer-col-title">{t.footer.accreditation}</h4>
+          <h4 className="footer-col-title">{t.footer?.accreditation}</h4>
           <div className="accreditation-badges">
             <div className="accred-badge">
               <span className="accred-icon">🎓</span>
@@ -89,11 +104,11 @@ export default function Footer() {
       {/* Bottom bar */}
       <div className="footer-bottom">
         <div className="container footer-bottom-inner">
-          <span>{t.footer.rights}</span>
+          <span>{t.footer?.rights}</span>
           <div className="footer-policy-links">
-            <Link to="/policies#privacy">{t.footer.policies}</Link>
-            <Link to="/policies#safeguarding">{t.footer.safeguarding}</Link>
-            <Link to="/policies#terms">{t.footer.terms}</Link>
+            <Link to="/policies#privacy">{t.footer?.policies}</Link>
+            <Link to="/policies#safeguarding">{t.footer?.safeguarding}</Link>
+            <Link to="/policies#terms">{t.footer?.terms}</Link>
           </div>
         </div>
       </div>

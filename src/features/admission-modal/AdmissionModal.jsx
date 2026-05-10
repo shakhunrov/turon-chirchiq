@@ -1,13 +1,6 @@
-import { useState, useEffect } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useState } from 'react';
 import { useLang } from '../../shared/i18n';
-import {
-  submitAdmission,
-  resetAdmissionStatus,
-  selectAdmissionsLoading,
-  selectAdmissionSubmitSuccess,
-  selectAdmissionsError,
-} from '../../features/admissions';
+import { useAdmissionMutation } from '../../shared/api/hooks';
 import { X } from 'lucide-react';
 import './AdmissionModal.css';
 
@@ -16,26 +9,20 @@ const GRADES = ['Grade 1','Grade 2','Grade 3','Grade 4','Grade 5','Grade 6','Gra
 export default function AdmissionModal({ onClose }) {
   const { t } = useLang();
   const m = t.admissions.modal;
-  const dispatch = useDispatch();
 
-  const loading = useSelector(selectAdmissionsLoading);
-  const submitSuccess = useSelector(selectAdmissionSubmitSuccess);
-  const error = useSelector(selectAdmissionsError);
+  const mutation = useAdmissionMutation();
+  const { mutate, isLoading: loading, isSuccess: submitSuccess, error: mutationError } = mutation;
 
   const [form, setForm] = useState({ name: '', phone: '', grade: '' });
 
-  useEffect(() => {
-    return () => dispatch(resetAdmissionStatus());
-  }, [dispatch]);
-
   const handleSubmit = (e) => {
     e.preventDefault();
-    dispatch(submitAdmission({
+    mutate({
       student_name: form.name,
       phone: form.phone,
       grade: form.grade,
-      branch: localStorage.getItem("globalBranchId") || 9,
-    }));
+      branch: localStorage.getItem("globalBranchId") || null,
+    });
   };
 
   return (
@@ -83,9 +70,11 @@ export default function AdmissionModal({ onClose }) {
                 {GRADES.map((g) => <option key={g} value={g}>{g}</option>)}
               </select>
             </div>
-            {error && (
+            {mutationError && (
               <div style={{ color: '#ef4444', fontSize: 13, marginBottom: 8 }}>
-                {typeof error === 'string' ? error : "Xatolik yuz berdi. Qaytadan urinib ko'ring."}
+                {mutationError.response?.data?.errors?.student_name?.[0] || 
+                 mutationError.response?.data?.message || 
+                 "Xatolik yuz berdi. Qaytadan urinib ko'ring."}
               </div>
             )}
             <button type="submit" className="btn btn-primary" style={{ width: '100%', marginTop: 8, justifyContent: 'center' }} disabled={loading}>

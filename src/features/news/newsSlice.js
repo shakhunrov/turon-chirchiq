@@ -54,7 +54,7 @@ export const createNews = createAsyncThunk(
         });
       } else {
         // If image is a URL string or empty, send as JSON (no image field)
-        const { image, ...rest } = newsData;
+        const { image: _image, ...rest } = newsData;
         body = rest;
       }
 

@@ -1,36 +1,21 @@
-import { useEffect } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { useLang } from '../../shared/i18n';
-import {
-  createContact,
-  resetContactStatus,
-  selectContactLoading,
-  selectContactError,
-  selectSubmitSuccess,
-} from '../../features/contact';
 import { useState } from 'react';
+import { useLang } from '../../shared/i18n';
+import { useContactMutation } from '../../shared/api/hooks';
 import './Contact.css';
 
 export default function Contact() {
   const { t } = useLang();
   const c = t.contact;
-  const dispatch = useDispatch();
 
-  const loading = useSelector(selectContactLoading);
-  const error = useSelector(selectContactError);
-  const submitSuccess = useSelector(selectSubmitSuccess);
+  const mutation = useContactMutation();
+  const { mutate: submit, isLoading: loading, isSuccess: submitSuccess, error: mutationError } = mutation;
   const branchId = localStorage.getItem('globalBranchId');
 
   const [form, setForm] = useState({ name: '', email: '', message: '' });
 
-  // Reset status on unmount
-  useEffect(() => {
-    return () => dispatch(resetContactStatus());
-  }, [dispatch]);
-
   const handleSubmit = (e) => {
     e.preventDefault();
-    dispatch(createContact({ ...form, branch: branchId }));
+    submit({ ...form, branch: branchId });
   };
 
   return (
@@ -96,9 +81,11 @@ export default function Contact() {
                   <textarea className="form-input" value={form.message} onChange={(e) => setForm({ ...form, message: e.target.value })} required />
                 </div>
 
-                {error && (
+                {mutationError && (
                   <div style={{ color: '#e74c3c', fontSize: 14, marginBottom: 12 }}>
-                    {typeof error === 'string' ? error : "Xatolik yuz berdi. Qaytadan urinib ko'ring."}
+                    {mutationError.response?.data?.message || 
+                     mutationError.response?.data?.detail || 
+                     "Xatolik yuz berdi. Qaytadan urinib ko'ring."}
                   </div>
                 )}
 

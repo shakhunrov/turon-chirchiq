@@ -16,10 +16,10 @@ export default function WhyChoose() {
         </div>
 
         <div className="why-grid">
-          {t.whyChoose.items.map((item, i) => (
+          {(t.why_choose_items || t.whyChoose.items).map((item, i) => (
             <div key={i} className="why-card glass-card">
-              <div className="why-icon">{icons[i]}</div>
-              <p className="why-text">{item}</p>
+              <div className="why-icon">{typeof item === 'object' ? (item.icon || icons[i % icons.length]) : icons[i % icons.length]}</div>
+              <p className="why-text">{typeof item === 'object' ? item.text : item}</p>
             </div>
           ))}
         </div>

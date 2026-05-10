@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate, useParams } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { LangProvider } from '../shared/i18n';
 import { AdminAuthProvider } from '../shared/admin/adminAuth';
@@ -6,21 +6,21 @@ import { selectIsAuth } from '../features/auth';
 import Navbar from '../widgets/navbar/Navbar';
 import Footer from '../widgets/footer/Footer';
 import StickyCTA from '../widgets/sticky-cta/StickyCTA';
-import Home from '../pages/home/Home';
-import AboutCampus from '../pages/about-campus/AboutCampus';
-import AboutVision from '../pages/about-vision/AboutVision';
-import AboutLeadership from '../pages/about-leadership/AboutLeadership';
-import AboutWhyTis from '../pages/about-why-tis/AboutWhyTis';
-import Education from '../pages/education/Education';
-import Partnerships from '../pages/partnerships/Partnerships';
-import Careers from '../pages/careers/Careers';
-import News from '../pages/news/News';
-import Admissions from '../pages/admissions/Admissions';
-import Contact from '../pages/contact/Contact';
-import Policies from '../pages/policies/Policies';
 import AdminLogin from '../pages/admin/AdminLogin';
-import AdminDashboard from '../pages/admin/AdminDashboard';
-import '../app/globals.css';
+import AdminDashboard from '../admin/pages/Dashboard';
+import PagesManager from '../admin/pages/PagesManager';
+import PageEditor from '../admin/pages/PageEditor';
+import TranslationsManager from '../admin/pages/TranslationsManager';
+import MediaManager from '../admin/pages/MediaManager';
+import MenuBuilder from '../admin/pages/MenuBuilder';
+import ComponentsLibrary from '../admin/pages/ComponentsLibrary';
+import GlobalSettings from '../admin/pages/GlobalSettings';
+import FormBuilder from '../admin/pages/FormBuilder';
+import NewsManager from '../admin/pages/NewsManager';
+import InquiryManager from '../admin/pages/InquiryManager';
+
+import { PageRenderer } from '../platform/renderer/PageRenderer';
+import '../index.css';
 import '../pages/admin/AdminDashboard.css';
 
 // Protected route wrapper
@@ -41,41 +41,41 @@ function PublicLayout({ children }) {
   );
 }
 
+function DynamicSlugRenderer({ nested }) {
+  const { parent, slug } = useParams();
+  const { slug: paramsSlug } = useParams();
+  const targetSlug = nested ? `${parent}-${slug}` : paramsSlug;
+  return <PageRenderer slug={targetSlug || 'home'} />;
+}
+
 export default function App() {
   return (
     <LangProvider>
       <AdminAuthProvider>
         <BrowserRouter>
           <Routes>
-            {/* Admin routes (no public navbar/footer) */}
-            <Route path="/admin" element={<AdminLogin />} />
-            <Route
-              path="/admin/dashboard"
-              element={
-                <ProtectedAdminRoute>
-                  <AdminDashboard />
-                </ProtectedAdminRoute>
-              }
-            />
+            {/* Admin Routes */}
+            <Route path="/admin/login" element={<AdminLogin />} />
+            <Route path="/admin" element={<ProtectedAdminRoute><AdminDashboard /></ProtectedAdminRoute>} />
+            <Route path="/admin/dashboard" element={<ProtectedAdminRoute><AdminDashboard /></ProtectedAdminRoute>} />
+            <Route path="/admin/cms/pages" element={<ProtectedAdminRoute><PagesManager /></ProtectedAdminRoute>} />
+            <Route path="/admin/cms/pages/:id" element={<ProtectedAdminRoute><PageEditor /></ProtectedAdminRoute>} />
+            <Route path="/admin/cms/translations" element={<ProtectedAdminRoute><TranslationsManager /></ProtectedAdminRoute>} />
+            <Route path="/admin/cms/media" element={<ProtectedAdminRoute><MediaManager /></ProtectedAdminRoute>} />
+            <Route path="/admin/cms/menus" element={<ProtectedAdminRoute><MenuBuilder /></ProtectedAdminRoute>} />
+            <Route path="/admin/cms/sections" element={<ProtectedAdminRoute><ComponentsLibrary /></ProtectedAdminRoute>} />
+            <Route path="/admin/cms/settings" element={<ProtectedAdminRoute><GlobalSettings /></ProtectedAdminRoute>} />
+            <Route path="/admin/cms/forms" element={<ProtectedAdminRoute><FormBuilder /></ProtectedAdminRoute>} />
+            <Route path="/admin/news" element={<ProtectedAdminRoute><NewsManager /></ProtectedAdminRoute>} />
+            <Route path="/admin/inquiries" element={<ProtectedAdminRoute><InquiryManager /></ProtectedAdminRoute>} />
 
-            {/* Public routes */}
+            {/* Public routes - Fully backend driven */}
             <Route path="/*" element={
               <PublicLayout>
                 <Routes>
-
-                  <Route path="/" element={<Home />} />
-                  <Route path="/about" element={<Navigate to="/about/vision" replace />} />
-                  <Route path="/about/campus" element={<AboutCampus />} />
-                  <Route path="/about/vision" element={<AboutVision />} />
-                  <Route path="/about/leadership" element={<AboutLeadership />} />
-                  <Route path="/about/why-tis" element={<AboutWhyTis />} />
-                  <Route path="/education" element={<Education />} />
-                  <Route path="/partnerships" element={<Partnerships />} />
-                  <Route path="/careers" element={<Careers />} />
-                  <Route path="/news" element={<News />} />
-                  <Route path="/admissions" element={<Admissions />} />
-                  <Route path="/contact" element={<Contact />} />
-                  <Route path="/policies" element={<Policies />} />
+                  <Route path="/" element={<PageRenderer slug="home" />} />
+                  <Route path="/:slug" element={<DynamicSlugRenderer />} />
+                  <Route path="/:parent/:slug" element={<DynamicSlugRenderer nested />} />
                   <Route path="*" element={<Navigate to="/" replace />} />
                 </Routes>
               </PublicLayout>

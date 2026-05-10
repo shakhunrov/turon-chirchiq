@@ -34,15 +34,27 @@ export default function Partnerships() {
             <div className="divider" />
             <p className="section-subtitle" style={{ marginBottom: 48 }}>{p.networkSubtitle}</p>
             <div className="partner-grid">
-              {p.categories.map((cat, i) => (
-                <div key={i} className="partner-card glass-card">
-                  <div className="partner-card-icon">
-                    {['🎓', '🏭', '🌐', '🤝'][i]}
+              {t.partners_items ? (
+                t.partners_items.map((partner) => (
+                  <div key={partner.id} className="partner-card glass-card">
+                    <div className="partner-card-icon">
+                      {partner.logo ? <img src={partner.logo} alt={partner.name} /> : '🤝'}
+                    </div>
+                    <h3 className="partner-card-title">{partner.name}</h3>
+                    <p className="partner-card-desc">{partner.description}</p>
                   </div>
-                  <h3 className="partner-card-title">{cat.title}</h3>
-                  <p className="partner-card-desc">{cat.desc}</p>
-                </div>
-              ))}
+                ))
+              ) : (
+                p.categories.map((cat, i) => (
+                  <div key={i} className="partner-card glass-card">
+                    <div className="partner-card-icon">
+                      {['🎓', '🏭', '🌐', '🤝'][i]}
+                    </div>
+                    <h3 className="partner-card-title">{cat.title}</h3>
+                    <p className="partner-card-desc">{cat.desc}</p>
+                  </div>
+                ))
+              )}
             </div>
           </div>
 
