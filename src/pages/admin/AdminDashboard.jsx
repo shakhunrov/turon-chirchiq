@@ -276,7 +276,7 @@ export default function AdminDashboard() {
                             onClick={() => { setView('adm-list'); setSearch(''); }}>
                         <UserPlus size={18} /> Qabullar
                     </button>
-                    <Link to="/editable/" className="sidebar-item">
+                    <Link to="/editable/" className="sidebar-item" target="_blank" rel="noopener noreferrer">
                         <Globe size={18} /> Saytni ko'rish
                     </Link>
                 </nav>

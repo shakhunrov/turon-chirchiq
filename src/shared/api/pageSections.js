@@ -13,16 +13,27 @@ export const getPageSections = async (params) => {
 
 // Section yaratish yoki yangilash
 export const savePageSection = async (data) => {
-    // Vsegda используем FormData для совместимости с backend
     const formData = new FormData();
+
+    // Har bir key'ni tekshiramiz
     Object.keys(data).forEach(key => {
-        if (key === 'content' && typeof data[key] === 'string') {
-            // content уже JSON string
-            formData.append(key, data[key]);
-        } else if (key === 'content' && typeof data[key] === 'object') {
-            formData.append(key, JSON.stringify(data[key]));
-        } else {
-            formData.append(key, data[key]);
+        const value = data[key];
+
+        // Agar File obyekti bo'lsa (rasm)
+        if (value instanceof File) {
+            formData.append(key, value);
+        }
+        // Agar content_uz, content_ru, content_en bo'lsa
+        else if (key.startsWith('content_')) {
+            if (typeof value === 'string') {
+                formData.append(key, value);
+            } else if (typeof value === 'object') {
+                formData.append(key, JSON.stringify(value));
+            }
+        }
+        // Agar oddiy qiymat bo'lsa
+        else {
+            formData.append(key, value);
         }
     });
 
