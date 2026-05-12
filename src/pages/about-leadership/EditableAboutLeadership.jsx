@@ -1,5 +1,5 @@
 import { useLang } from '../../shared/i18n';
-import { EditableSection } from '../../shared/editable';
+import { EditableSection, EditableList } from '../../shared/editable';
 import { useEditableSections } from '../../shared/api/useEditableSections';
 import directorImg from '../../shared/assets/img/director.png';
 import './AboutLeadership.css';
@@ -89,14 +89,23 @@ export default function EditableAboutLeadership() {
               <div className="board-desc glass-card">
                 <p>{sections.board.desc}</p>
               </div>
+
               <div className="board-members">
-                {sections.board.members.map((m, i) => (
-                  <div key={i} className="board-card glass-card">
-                    <div className="board-avatar">{m.avatar}</div>
-                    <div className="board-name">{m.name}</div>
-                    <div className="board-role">{m.role}</div>
-                  </div>
-                ))}
+                <EditableList
+                  items={sections.board.members}
+                  onSave={(newMembers) => {
+                    handleSaveSection('board', { ...sections.board, members: newMembers });
+                  }}
+                  renderItem={(member) => (
+                    <div className="board-card glass-card">
+                      <div className="board-avatar">{member.avatar}</div>
+                      <div className="board-name">{member.name}</div>
+                      <div className="board-role">{member.role}</div>
+                    </div>
+                  )}
+                  defaultItem={{ name: '', role: 'Academic Advisor', avatar: '👤' }}
+                  itemName="Kengash a'zosi"
+                />
               </div>
             </div>
           </EditableSection>

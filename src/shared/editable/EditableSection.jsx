@@ -18,8 +18,7 @@ export default function EditableSection({ sectionId, data, onSave, children }) {
         e.stopPropagation();
         setIsEditing(true);
         setIsFocused(true);
-        // Body scroll'ni to'xtatish
-        document.body.style.overflow = 'hidden';
+        // Body scroll'ni to'xtatmaslik - modal ichida scroll bo'ladi
         // Boshqa section'larni blur qilish uchun event
         window.dispatchEvent(new CustomEvent('section-focus', { detail: { sectionId } }));
     };
@@ -28,7 +27,6 @@ export default function EditableSection({ sectionId, data, onSave, children }) {
         setIsEditing(false);
         setIsFocused(false);
         // Body scroll'ni qayta yoqish
-        document.body.style.overflow = '';
         window.dispatchEvent(new CustomEvent('section-blur'));
     };
 

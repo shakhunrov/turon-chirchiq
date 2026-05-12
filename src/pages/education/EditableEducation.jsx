@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useLang } from '../../shared/i18n';
-import { EditableSection } from '../../shared/editable';
+import { EditableSection, EditableList } from '../../shared/editable';
 import { getPageSections, savePageSection } from '../../shared/api/pageSections';
 import './Education.css';
 
@@ -136,16 +136,24 @@ export default function EditableEducation() {
                             <h2 className="section-title">{sections.skills.title}</h2>
                             <div className="divider" />
                             <div className="skills-grid">
-                                {sections.skills.skills.map((skill, i) => (
-                                    <div key={i} className="skill-card glass-card">
-                                        <div className="skill-icon">{skill.icon}</div>
-                                        <h3 className="skill-title">{skill.title}</h3>
-                                        <p className="skill-desc">{skill.desc}</p>
-                                        <div className="skill-how">
-                                            <span className="skill-how-label">How:</span> {skill.how}
+                                <EditableList
+                                    items={sections.skills.skills}
+                                    onSave={(newSkills) => {
+                                        handleSaveSection('skills', { ...sections.skills, skills: newSkills });
+                                    }}
+                                    renderItem={(skill) => (
+                                        <div className="skill-card glass-card">
+                                            <div className="skill-icon">{skill.icon}</div>
+                                            <h3 className="skill-title">{skill.title}</h3>
+                                            <p className="skill-desc">{skill.desc}</p>
+                                            <div className="skill-how">
+                                                <span className="skill-how-label">How:</span> {skill.how}
+                                            </div>
                                         </div>
-                                    </div>
-                                ))}
+                                    )}
+                                    defaultItem={{ icon: '🎯', title: '', desc: '', how: '' }}
+                                    itemName="Ko'nikma"
+                                />
                             </div>
                         </div>
                     </EditableSection>
@@ -196,12 +204,23 @@ export default function EditableEducation() {
                             <h2 className="section-title">{sections.curriculum.title}</h2>
                             <div className="divider" />
                             <div className="curriculum-grid">
-                                {sections.curriculum.curricula.map((c, i) => (
-                                    <div key={i} className="curriculum-card glass-card">
-                                        <span className="curriculum-icon">📋</span>
-                                        <span className="curriculum-name">{c}</span>
-                                    </div>
-                                ))}
+                                <EditableList
+                                    items={sections.curriculum.curricula.map(c => ({ name: c }))}
+                                    onSave={(newCurricula) => {
+                                        handleSaveSection('curriculum', {
+                                            ...sections.curriculum,
+                                            curricula: newCurricula.map(c => c.name)
+                                        });
+                                    }}
+                                    renderItem={(curriculum) => (
+                                        <div className="curriculum-card glass-card">
+                                            <span className="curriculum-icon">📋</span>
+                                            <span className="curriculum-name">{curriculum.name}</span>
+                                        </div>
+                                    )}
+                                    defaultItem={{ name: '' }}
+                                    itemName="Dastur"
+                                />
                             </div>
                         </div>
                     </EditableSection>

@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import HeroBanner from '../../widgets/hero-banner/HeroBanner';
-import WhyChoose from '../../widgets/why-choose/WhyChoose';
-import Testimonials from '../../widgets/testimonials/Testimonials';
+import EditableWhyChoose from '../../widgets/why-choose/EditableWhyChoose';
+import EditableTestimonials from '../../widgets/testimonials/EditableTestimonials';
 import NewsSection from '../../widgets/news-section/NewsSection';
 import { EditableSection } from '../../shared/editable';
 import { useLang } from '../../shared/i18n';
@@ -173,8 +173,8 @@ export default function EditableHome() {
                 </section>
             </EditableSection>
 
-            <WhyChoose />
-            <Testimonials />
+            <EditableWhyChoose />
+            <EditableTestimonials />
             <NewsSection />
 
             {/* CTA Banner - Editable */}
