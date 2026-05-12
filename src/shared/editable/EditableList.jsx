@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { createPortal } from 'react-dom';
 import { Edit2, Trash2, Plus, Save, X } from 'lucide-react';
 import './EditableList.css';
 
@@ -134,12 +135,6 @@ export default function EditableList({ items = [], onSave, renderItem, defaultIt
 
     return (
         <>
-            {/* Create tugmasi */}
-            <button className="editable-list-create-btn" onClick={handleCreate} title={`Yangi ${itemName} qo'shish`}>
-                <Plus size={16} />
-                <span>Yangi {itemName}</span>
-            </button>
-
             {/* List items - har birida edit/delete tugmalari */}
             {items.map((item, index) => (
                 <div key={index} className="editable-list-item">
@@ -168,8 +163,14 @@ export default function EditableList({ items = [], onSave, renderItem, defaultIt
                 </div>
             ))}
 
+            {/* Create tugmasi - pastda */}
+            <button className="editable-list-create-btn" onClick={handleCreate} title={`Yangi ${itemName} qo'shish`}>
+                <Plus size={16} />
+                <span>Yangi {itemName}</span>
+            </button>
+
             {/* Edit/Create Modal */}
-            {(editingIndex !== null || isCreating) && (
+            {(editingIndex !== null || isCreating) && createPortal(
                 <div className="edit-modal-overlay" onClick={handleClose}>
                     <div className="edit-modal" onClick={(e) => e.stopPropagation()}>
                         <div className="edit-modal-header">
@@ -180,8 +181,8 @@ export default function EditableList({ items = [], onSave, renderItem, defaultIt
                         </div>
 
                         <div className="edit-modal-body">
-                            {Object.entries(isCreating ? defaultItem : items[editingIndex] || {}).map(([key, value]) =>
-                                renderField(key, value)
+                            {Object.keys(isCreating ? defaultItem : items[editingIndex] || {}).map((key) =>
+                                renderField(key, formData[key])
                             )}
                         </div>
 
@@ -203,7 +204,8 @@ export default function EditableList({ items = [], onSave, renderItem, defaultIt
                             </button>
                         </div>
                     </div>
-                </div>
+                </div>,
+                document.body
             )}
         </>
     );

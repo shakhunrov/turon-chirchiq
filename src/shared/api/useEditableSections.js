@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { getPageSections, savePageSection } from './pageSections';
+import { useLang } from '../i18n';
 
 /**
  * useEditableSections - Editable sections uchun custom hook
@@ -10,6 +11,7 @@ import { getPageSections, savePageSection } from './pageSections';
  */
 export function useEditableSections(pageName, defaultSections) {
     const branchId = localStorage.getItem('globalBranchId');
+    const { lang } = useLang(); // Текущий язык из контекста
     const [sections, setSections] = useState(defaultSections);
 
     useEffect(() => {
@@ -20,7 +22,18 @@ export function useEditableSections(pageName, defaultSections) {
                     const loadedSections = {};
                     data.forEach(section => {
                         try {
-                            loadedSections[section.section_id] = JSON.parse(section.content);
+                            // Получаем контент для текущего языка
+                            const contentField = `content_${lang}`;
+                            let content = section[contentField];
+
+                            // Если content - строка, парсим JSON
+                            if (typeof content === 'string') {
+                                content = JSON.parse(content);
+                            }
+
+                            if (content && Object.keys(content).length > 0) {
+                                loadedSections[section.section_id] = content;
+                            }
                         } catch (e) {
                             console.error(`Section ${section.section_id} parse error:`, e);
                         }
@@ -32,15 +45,17 @@ export function useEditableSections(pageName, defaultSections) {
             }
         };
         loadSections();
-    }, [branchId, pageName]);
+    }, [branchId, pageName, lang]);
 
     const handleSaveSection = async (sectionId, data) => {
         try {
+            // Отправляем в поле для текущего языка
+            const contentField = `content_${lang}`;
             await savePageSection({
                 branch: branchId,
                 page: pageName,
                 section_id: sectionId,
-                content: JSON.stringify(data),
+                [contentField]: JSON.stringify(data),
             });
             setSections(prev => ({ ...prev, [sectionId]: data }));
             alert('Section muvaffaqiyatli saqlandi!');

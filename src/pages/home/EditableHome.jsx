@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
-import HeroBanner from '../../widgets/hero-banner/HeroBanner';
+import { Link, useLocation } from 'react-router-dom';
+import EditableHeroBanner from '../../widgets/hero-banner/EditableHeroBanner';
 import EditableWhyChoose from '../../widgets/why-choose/EditableWhyChoose';
 import EditableTestimonials from '../../widgets/testimonials/EditableTestimonials';
-import NewsSection from '../../widgets/news-section/NewsSection';
+import EditableNewsSection from '../../widgets/news-section/EditableNewsSection';
 import { EditableSection } from '../../shared/editable';
 import { useLang } from '../../shared/i18n';
 import { getPageSections, savePageSection } from '../../shared/api/pageSections';
@@ -11,8 +11,11 @@ import schoolImg from '../../shared/assets/img/school.png';
 import '../home/Home.css';
 
 export default function EditableHome() {
-    const { t } = useLang();
+    const { t, lang } = useLang();
+    const location = useLocation();
     const branchId = localStorage.getItem('globalBranchId');
+    const isEditableMode = location.pathname.startsWith('/editable');
+    const basePrefix = isEditableMode ? '/editable' : '';
 
     // Section ma'lumotlari
     const [sections, setSections] = useState({
@@ -33,7 +36,12 @@ export default function EditableHome() {
             label: 'Falsafa',
             title: t.philosophy.title,
             text: t.philosophy.text,
-            tags: ['STEAM', 'AI', 'Cambridge', 'Kelajak ko\'nikmalari'],
+            tags: [
+                { name: 'STEAM', icon: '🔬' },
+                { name: 'AI', icon: '🤖' },
+                { name: 'Cambridge', icon: '🎓' },
+                { name: 'Kelajak ko\'nikmalari', icon: '🚀' }
+            ],
         },
         cta: {
             title: t.cta.title,
@@ -50,7 +58,22 @@ export default function EditableHome() {
                 if (data && data.length > 0) {
                     const loadedSections = {};
                     data.forEach(section => {
-                        loadedSections[section.section_id] = JSON.parse(section.content);
+                        try {
+                            // Получаем контент для текущего языка
+                            const contentField = `content_${lang}`;
+                            let content = section[contentField];
+
+                            // Если content - строка, парсим JSON
+                            if (typeof content === 'string') {
+                                content = JSON.parse(content);
+                            }
+
+                            if (content && Object.keys(content).length > 0) {
+                                loadedSections[section.section_id] = content;
+                            }
+                        } catch (e) {
+                            console.error(`Section ${section.section_id} parse error:`, e);
+                        }
                     });
                     setSections(prev => ({ ...prev, ...loadedSections }));
                 }
@@ -59,16 +82,18 @@ export default function EditableHome() {
             }
         };
         loadSections();
-    }, [branchId]);
+    }, [branchId, lang]);
 
     // Section'ni saqlash
     const handleSaveSection = async (sectionId, data) => {
         try {
+            // Отправляем в поле для текущего языка
+            const contentField = `content_${lang}`;
             await savePageSection({
                 branch: branchId,
                 page: 'home',
                 section_id: sectionId,
-                content: JSON.stringify(data),
+                [contentField]: JSON.stringify(data),
             });
 
             setSections(prev => ({
@@ -85,7 +110,7 @@ export default function EditableHome() {
 
     return (
         <div className="page">
-            <HeroBanner />
+            <EditableHeroBanner />
 
             {/* Biz haqimizda - Editable */}
             <EditableSection
@@ -100,7 +125,7 @@ export default function EditableHome() {
                             <h2 className="section-title">{sections.whoWeAre.title}</h2>
                             <div className="divider" />
                             <p className="wwa-text">{sections.whoWeAre.text}</p>
-                            <Link to="/about/vision" className="btn btn-primary" style={{ marginTop: 16 }}>
+                            <Link to={`${basePrefix}/about/vision`} className="btn btn-primary" style={{ marginTop: 16 }}>
                                 Batafsil →
                             </Link>
                         </div>
@@ -160,13 +185,16 @@ export default function EditableHome() {
                             <h2 className="section-title">{sections.philosophy.title}</h2>
                             <div className="divider" />
                             <p className="section-subtitle">{sections.philosophy.text}</p>
-                            <Link to="/education" className="btn btn-outline" style={{ marginTop: 24 }}>
+                            <Link to={`${basePrefix}/education`} className="btn btn-outline" style={{ marginTop: 24 }}>
                                 Bizning yondashuvimiz →
                             </Link>
                         </div>
                         <div className="philosophy-cards">
-                            {sections.philosophy.tags.map((tag) => (
-                                <div key={tag} className="phil-tag glass-card">{tag}</div>
+                            {sections.philosophy.tags.map((tag, idx) => (
+                                <div key={idx} className="phil-tag glass-card">
+                                    {tag.icon && <span style={{ marginRight: '8px' }}>{tag.icon}</span>}
+                                    {tag.name || tag}
+                                </div>
                             ))}
                         </div>
                     </div>
@@ -175,7 +203,7 @@ export default function EditableHome() {
 
             <EditableWhyChoose />
             <EditableTestimonials />
-            <NewsSection />
+            <EditableNewsSection />
 
             {/* CTA Banner - Editable */}
             <EditableSection
@@ -189,10 +217,10 @@ export default function EditableHome() {
                             <div className="cta-glow" />
                             <h2 className="cta-title">{sections.cta.title}</h2>
                             <div className="cta-actions">
-                                <Link to="/admissions" className="btn btn-primary">
+                                <Link to={`${basePrefix}/admissions`} className="btn btn-primary">
                                     {sections.cta.button}
                                 </Link>
-                                <Link to="/contact" className="btn btn-outline">
+                                <Link to={`${basePrefix}/contact`} className="btn btn-outline">
                                     {sections.cta.consult}
                                 </Link>
                             </div>

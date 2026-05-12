@@ -5,7 +5,7 @@ import { getPageSections, savePageSection } from '../../shared/api/pageSections'
 import './Education.css';
 
 export default function EditableEducation() {
-    const { t } = useLang();
+    const { t, lang } = useLang();
     const e = t.education;
     const branchId = localStorage.getItem('globalBranchId');
 
@@ -31,6 +31,10 @@ export default function EditableEducation() {
             title: e.classroomTitle || 'Ko\'nikmalar → Sinf amaliyoti',
             skillLabel: e.classroomSkillLabel || 'Ko\'nikma',
             practiceLabel: e.classroomPracticeLabel || 'Sinfda qanday ko\'rinadi',
+            rows: e.skills?.map(skill => ({
+                skill: skill.title,
+                practice: skill.how
+            })) || [],
         },
         assessment: {
             title: e.assessTitle,
@@ -53,7 +57,22 @@ export default function EditableEducation() {
                 if (data && data.length > 0) {
                     const loadedSections = {};
                     data.forEach(section => {
-                        loadedSections[section.section_id] = JSON.parse(section.content);
+                        try {
+                            // Получаем контент для текущего языка
+                            const contentField = `content_${lang}`;
+                            let content = section[contentField];
+
+                            // Если content - строка, парсим JSON
+                            if (typeof content === 'string') {
+                                content = JSON.parse(content);
+                            }
+
+                            if (content && Object.keys(content).length > 0) {
+                                loadedSections[section.section_id] = content;
+                            }
+                        } catch (e) {
+                            console.error(`Section ${section.section_id} parse error:`, e);
+                        }
                     });
                     setSections(prev => ({ ...prev, ...loadedSections }));
                 }
@@ -62,15 +81,17 @@ export default function EditableEducation() {
             }
         };
         loadSections();
-    }, [branchId]);
+    }, [branchId, lang]);
 
     const handleSaveSection = async (sectionId, data) => {
         try {
+            // Отправляем в поле для текущего языка
+            const contentField = `content_${lang}`;
             await savePageSection({
                 branch: branchId,
                 page: 'education',
                 section_id: sectionId,
-                content: JSON.stringify(data),
+                [contentField]: JSON.stringify(data),
             });
             setSections(prev => ({ ...prev, [sectionId]: data }));
             alert('Section muvaffaqiyatli saqlandi!');
@@ -172,12 +193,20 @@ export default function EditableEducation() {
                                     <span>{sections.classroom.skillLabel}</span>
                                     <span>{sections.classroom.practiceLabel}</span>
                                 </div>
-                                {sections.skills.skills.map((skill) => (
-                                    <div key={skill.title} className="classroom-row">
-                                        <span className="classroom-skill">{skill.title}</span>
-                                        <span className="classroom-practice">{skill.how}</span>
-                                    </div>
-                                ))}
+                                <EditableList
+                                    items={sections.classroom.rows || []}
+                                    onSave={(newRows) => {
+                                        handleSaveSection('classroom', { ...sections.classroom, rows: newRows });
+                                    }}
+                                    renderItem={(row) => (
+                                        <div className="classroom-row">
+                                            <span className="classroom-skill">{row.skill}</span>
+                                            <span className="classroom-practice">{row.practice}</span>
+                                        </div>
+                                    )}
+                                    defaultItem={{ skill: '', practice: '' }}
+                                    itemName="Qator"
+                                />
                             </div>
                         </div>
                     </EditableSection>

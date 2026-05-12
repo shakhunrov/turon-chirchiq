@@ -84,7 +84,11 @@ export default function Navbar() {
                 {link.children && <svg width="12" height="12" viewBox="0 0 12 12" fill="currentColor" style={{marginLeft:4}}><path d="M2 4l4 4 4-4"/></svg>}
               </Link>
               {link.children && dropdown === link.href && (
-                <div className="nav-dropdown">
+                <div
+                  className="nav-dropdown"
+                  onMouseEnter={() => setDropdown(link.href)}
+                  onMouseLeave={() => setDropdown(null)}
+                >
                   {link.children.map((child) => (
                     <Link key={child.href} to={child.href} className="nav-dropdown-item">
                       {child.label}

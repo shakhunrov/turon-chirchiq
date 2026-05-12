@@ -5,7 +5,7 @@ import { getPageSections, savePageSection } from '../../shared/api/pageSections'
 import './AboutVision.css';
 
 export default function EditableAboutVision() {
-    const { t } = useLang();
+    const { t, lang } = useLang();
     const v = t.about.vision;
     const branchId = localStorage.getItem('globalBranchId');
 
@@ -36,7 +36,22 @@ export default function EditableAboutVision() {
                 if (data && data.length > 0) {
                     const loadedSections = {};
                     data.forEach(section => {
-                        loadedSections[section.section_id] = JSON.parse(section.content);
+                        try {
+                            // Получаем контент для текущего языка
+                            const contentField = `content_${lang}`;
+                            let content = section[contentField];
+
+                            // Если content - строка, парсим JSON
+                            if (typeof content === 'string') {
+                                content = JSON.parse(content);
+                            }
+
+                            if (content && Object.keys(content).length > 0) {
+                                loadedSections[section.section_id] = content;
+                            }
+                        } catch (e) {
+                            console.error(`Section ${section.section_id} parse error:`, e);
+                        }
                     });
                     setSections(prev => ({ ...prev, ...loadedSections }));
                 }
@@ -45,15 +60,17 @@ export default function EditableAboutVision() {
             }
         };
         loadSections();
-    }, [branchId]);
+    }, [branchId, lang]);
 
     const handleSaveSection = async (sectionId, data) => {
         try {
+            // Отправляем в поле для текущего языка
+            const contentField = `content_${lang}`;
             await savePageSection({
                 branch: branchId,
                 page: 'about-vision',
                 section_id: sectionId,
-                content: JSON.stringify(data),
+                [contentField]: JSON.stringify(data),
             });
             setSections(prev => ({ ...prev, [sectionId]: data }));
             alert('Section muvaffaqiyatli saqlandi!');

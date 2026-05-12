@@ -80,7 +80,7 @@ export default function EditableTestimonials() {
                   </div>
                 </div>
               )}
-              defaultItem={{ text: '', name: '', role: '' }}
+              defaultItem={{ icon: '', name: '', role: '', text: '' }}
               itemName="Fikr"
             />
           </div>

@@ -1,5 +1,6 @@
 import { useLang } from '../../shared/i18n';
-import { EditableSection, EditableList } from '../../shared/editable';
+import { EditableSection } from '../../shared/editable';
+import { EditableList } from '../../shared/editable';
 import { useEditableSections } from '../../shared/api/useEditableSections';
 import './WhyChoose.css';
 
@@ -32,18 +33,16 @@ export default function EditableWhyChoose() {
 
           <div className="why-grid">
             <EditableList
-              items={sections.main.items}
-              onSave={(newItems) => {
-                handleSaveSection('main', { ...sections.main, items: newItems });
-              }}
+              items={sections.main.items || []}
+              onSave={(newItems) => handleSaveSection('main', { ...sections.main, items: newItems })}
+              defaultItem={{ text: '', icon: '🌍' }}
+              itemName="Card"
               renderItem={(item) => (
                 <div className="why-card glass-card">
                   <div className="why-icon">{item.icon}</div>
                   <p className="why-text">{item.text}</p>
                 </div>
               )}
-              defaultItem={{ text: '', icon: '✨' }}
-              itemName="Afzallik"
             />
           </div>
         </div>
