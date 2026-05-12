@@ -32,6 +32,10 @@ export default function Navbar() {
   const [open, setOpen] = useState(false);
   const [dropdown, setDropdown] = useState(null);
 
+  // Editable rejimda ekanligini aniqlash
+  const isEditableMode = location.pathname.startsWith('/editable');
+  const basePrefix = isEditableMode ? '/editable' : '';
+
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 40);
     window.addEventListener('scroll', onScroll);
@@ -40,13 +44,20 @@ export default function Navbar() {
 
   useEffect(() => { setOpen(false); setDropdown(null); }, [location.pathname]);
 
-  const links = navLinks(t);
+  const links = navLinks(t).map(link => ({
+    ...link,
+    href: basePrefix + link.href,
+    children: link.children?.map(child => ({
+      ...child,
+      href: basePrefix + child.href,
+    })),
+  }));
 
   return (
     <header className={`navbar ${scrolled ? 'scrolled' : ''}`}>
       <div className="container navbar-inner">
         {/* Logo */}
-        <Link to="/" className="navbar-logo">
+        <Link to={basePrefix + "/"} className="navbar-logo">
           <div className="logo-icon">
               <img  width={70} src={logo} alt=""/>
           </div>
@@ -88,7 +99,7 @@ export default function Navbar() {
         {/* Right side */}
         <div className="navbar-right">
           <LanguageSwitcher />
-          <Link to="/admissions" className="btn btn-primary btn-sm">
+          <Link to={basePrefix + "/admissions"} className="btn btn-primary btn-sm">
             {t.hero.apply}
           </Link>
           <button className="menu-btn" onClick={() => setOpen(!open)} aria-label="Menu">
