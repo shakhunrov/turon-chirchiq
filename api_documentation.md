@@ -1,13 +1,11 @@
-# Page Sections (Live Editing) API Documentation
+# Page Sections API Documentation
 
-This API provides endpoints for managing editable sections on the website. It is designed to support the "Live Editing" feature where administrators can update content directly on the page.
+This API provides endpoints for managing editable sections on the website, including support for multiple images.
 
 ## Base URL
-All requests should be made to:
-`https://school.gennis.uz/api/` (or your local development server)
+`https://school.gennis.uz/api/`
 
 ## Authentication
-Most endpoints require a valid JWT token in the header:
 `Authorization: Bearer <access_token>`
 
 ---
@@ -20,8 +18,8 @@ Retrieve all editable sections for a specific page and branch.
 **Query Parameters:**
 | Parameter | Type | Required | Description |
 | :--- | :--- | :--- | :--- |
-| `branch` | Integer | No | Branch ID (from `globalBranchId`) |
-| `page` | String | Yes | Page identifier (e.g., `home`, `education`, `about-campus`) |
+| `branch` | Integer | No | Branch ID |
+| `page` | String | Yes | Page identifier (e.g., `home`, `about-campus`) |
 
 **Response (Example):**
 ```json
@@ -31,12 +29,22 @@ Retrieve all editable sections for a specific page and branch.
     "branch": 1,
     "page": "home",
     "section_id": "whoWeAre",
-    "content": {
-      "label": "About Us",
-      "title": "Welcome to TIS",
-      "text": "..."
-    },
-    "image": "https://api.domain.com/media/sections/images/school.png",
+    "content_uz": { "title": "Xush kelibsiz", "text": "..." },
+    "content_en": { "title": "Welcome", "text": "..." },
+    "content_ru": { "title": "Добро пожаловать", "text": "..." },
+    "image": "https://api.domain.com/media/sections/images/main.png",
+    "images": [
+      {
+        "id": 10,
+        "image": "https://api.domain.com/media/sections/images/gallery1.png",
+        "order": 0
+      },
+      {
+        "id": 11,
+        "image": "https://api.domain.com/media/sections/images/gallery2.png",
+        "order": 1
+      }
+    ],
     "updated_at": "2026-05-12T09:50:00Z"
   }
 ]
@@ -45,69 +53,42 @@ Retrieve all editable sections for a specific page and branch.
 ---
 
 ## 2. Save/Update Page Section (Upsert)
-Create a new section or update an existing one. The backend identifies the section by the combination of `branch`, `page`, and `section_id`.
+Create a new section or update an existing one (identifies by `branch`, `page`, and `section_id`). This endpoint handles the main image and JSON content.
 
 **Endpoint:** `POST /page-sections/`
-
-**Content-Type:** `application/json` or `multipart/form-data` (if uploading an image)
+**Content-Type:** `multipart/form-data`
 
 **Request Body:**
 | Field | Type | Required | Description |
 | :--- | :--- | :--- | :--- |
 | `branch` | Integer | Yes | Branch ID |
 | `page` | String | Yes | Page identifier |
-| `section_id` | String | Yes | Section identifier (e.g., `stats`, `hero`) |
-| `content` | JSON | Yes | The actual data for the section |
-| `image` | File | No | Optional image file |
-
-**Example (JSON):**
-```json
-{
-  "branch": 1,
-  "page": "home",
-  "section_id": "stats",
-  "content": {
-    "title": "Our Impact",
-    "students": {"val": "1000+", "label": "Students"}
-  }
-}
-```
-
-**Response:**
-Returns the saved object with status `200 OK` (update) or `201 Created` (new).
+| `section_id` | String | Yes | Section identifier |
+| `content_uz` | JSON String | No | Content in Uzbek |
+| `content_en` | JSON String | No | Content in English |
+| `content_ru` | JSON String | No | Content in Russian |
+| `image` | File | No | Main image file |
 
 ---
 
-## 3. Delete Page Section
-Remove a section by its database ID.
+## 3. Upload Multiple Images
+Add one or more images to an existing PageSection.
 
-**Endpoint:** `DELETE /page-sections/{id}/`
+**Endpoint:** `POST /page-sections/{id}/upload-images/`
+**Content-Type:** `multipart/form-data`
 
-**Response:**
-Status `204 No Content`.
+**Request Body:**
+| Field | Type | Required | Description |
+| :--- | :--- | :--- | :--- |
+| `images` | Files[] | Yes | One or more image files (multiple parts with same name) |
+
+**Response:** Returns the updated PageSection object.
 
 ---
 
-## Usage in Frontend (Example)
+## 4. Delete Specific Image
+Remove a secondary image from a section.
 
-```javascript
-// Fetching sections
-const loadSections = async (page) => {
-    const branchId = localStorage.getItem('globalBranchId');
-    const { data } = await api.get('/page-sections/', { 
-        params: { branch: branchId, page: page } 
-    });
-    return data; // Returns array of sections
-};
+**Endpoint:** `DELETE /page-sections/images/{id}/`
 
-// Saving a section
-const handleSave = async (sectionId, content) => {
-    const branchId = localStorage.getItem('globalBranchId');
-    await api.post('/page-sections/', {
-        branch: branchId,
-        page: 'home',
-        section_id: sectionId,
-        content: content
-    });
-};
-```
+**Response:** `204 No Content`
